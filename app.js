@@ -75,8 +75,30 @@ const cronJob = new cron({
   cronTime: '00 0-59/3 * * * *', // 3分ごとに実行
   start: true, // newした後即時実行するかどうか
   onTick: function() {
-    getHomeTimeLine();
+    //getHomeTimeLine();
   }
 });
 
-getHomeTimeLine();
+//getHomeTimeLine();
+
+const stream = client.stream('statuses/filter', { track: '@netaro_bot' });
+stream.on('data', function(tweet) {
+  console.log(tweet.text);
+
+  const tweetMessage = '@' + tweet.user.screen_name + ' (*´ω`*)';
+  client.post('statuses/update', {
+    status:tweetMessage,
+    in_reply_to_status_id: tweet.id_str
+  })
+  .then((tweet) => {
+    console.log(tweet);
+  })
+  .catch((error) => {
+    throw error;
+  });
+
+});
+
+stream.on('error', function(error) {
+  throw error;
+});
